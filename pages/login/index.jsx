@@ -1,10 +1,11 @@
-import { Box, Button, Container, Grid, IconButton, InputAdornment } from '@material-ui/core';
+import { Box, Button, Container, Grid, IconButton, InputAdornment, Snackbar } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Axios from 'axios';
 import { Form, Formik } from 'formik';
 import Router from 'next/router';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Loader from 'react-loader-spinner';
 import * as yup from 'yup';
 import theme from '../../assets/theme';
@@ -23,6 +24,7 @@ const styles = {
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const initialValues = useMemo(
     () => ({
       username: '',
@@ -30,22 +32,39 @@ const Login = () => {
     }),
     [],
   );
+  const handleClose = useCallback(() => setErrorMessage(''), []);
 
-  const onSubmit = useCallback((data, { setSubmitting }) => {
+  const onSubmit = useCallback(async (data, { setSubmitting }) => {
     setSubmitting(true);
-    // make async call
-    if (data.username === 'admin' && data.password === 'pass') {
-      setSubmitting(false);
-      Router.push({
-        pathname: '/admin',
-        query: { user: data.username },
-      });
+    try {
+      const response = await Axios.post('/login', data);
+      if (response && response.status === 200) {
+        setErrorMessage('');
+        // TODO: set user to context; response.body
+        Router.push({
+          pathname: '/admin',
+          query: { user: data.username },
+        });
+        setSubmitting(false);
+      } else setErrorMessage('Something went wrong, please try again later.');
+    } catch (error) {
+      if (error.response)
+        switch (error.response.status) {
+          case 401:
+            setErrorMessage("You don't have access to this page!");
+            break;
+          case 404:
+            setErrorMessage('Invalid username or password!');
+            break;
+          default:
+            setErrorMessage('Something went wrong, please try again later.');
+            break;
+        }
+      else setErrorMessage('Something went wrong, please try again later.');
     }
   }, []);
 
-  const toggleShowPassword = useCallback(() => {
-    setShowPassword(!showPassword);
-  }, [showPassword]);
+  const toggleShowPassword = useCallback(() => setShowPassword(!showPassword), [showPassword]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -91,8 +110,12 @@ const Login = () => {
                     <Button disabled={isSubmitting} type='submit' variant='contained' color='primary'>
                       submit
                     </Button>
-                    {/* <pre>{JSON.stringify(values, null, 2)}</pre>
-                                <pre>{JSON.stringify(errors, null, 2)}</pre> */}
+                    <Snackbar
+                      open={!!errorMessage}
+                      autoHideDuration={6000}
+                      onClose={handleClose}
+                      message={errorMessage}
+                    />
                   </Grid>
                 </Form>
               )}

@@ -9,12 +9,11 @@ import TableRow from '@material-ui/core/TableRow';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import { makeStyles } from '@material-ui/styles';
 import Axios from 'axios';
 import React, { useCallback, useMemo, useState } from 'react';
 import theme from '../assets/theme';
-import EditBookPopup from './EditBookPopup';
+import EditUserPopup from './EditUserPopup';
 
 const useStyles = makeStyles({
   btn_group_root: {
@@ -25,27 +24,27 @@ const useStyles = makeStyles({
   actions_table_cell: { minWidth: 130 },
 });
 
-const BooksTable = ({ books, bookAdded, bookUpdated, bookRemoved }) => {
+const UsersTable = ({ users, userAdded, userUpdated, userRemoved }) => {
   const classes = useStyles();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   // TODO: maybe useReducer
   const [editPopupOpen, setEditPopupOpen] = useState(false);
   const [popupType, setPopupType] = useState('edit');
-  const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const rowsPerPageOptions = useMemo(() => [10, 25, 100], []);
 
   const tableCellStyle = (column) => ({ minWidth: column.minWidth });
 
   const columns = useMemo(
     () => [
-      { id: 'code', label: 'ID', minWidth: 35 },
-      { id: 'name', label: 'Name', minWidth: 250 },
-      { id: 'author', label: 'Author', minWidth: 170 },
-      { id: 'publHouse', label: 'Publishing House', minWidth: 140 },
-      { id: 'year', label: 'Year', minWidth: 70 },
-      { id: 'genre', label: 'Genre', minWidth: 100 },
-      { id: 'copies', label: 'No. Copies', minWidth: 70 },
+      { id: 'id', label: 'ID', minWidth: 35 },
+      { id: 'username', label: 'Username', minWidth: 250 },
+      { id: 'email', label: 'Email Address', minWidth: 250 },
+      { id: 'firstName', label: 'First Name', minWidth: 200 },
+      { id: 'lastName', label: 'Last Name', minWidth: 200 },
+      { id: 'isAdmin', label: 'Is Admin', minWidth: 50 },
+      { id: 'totalActions', label: 'No. Total Actions', minWidth: 70 },
     ],
     [],
   );
@@ -65,56 +64,56 @@ const BooksTable = ({ books, bookAdded, bookUpdated, bookRemoved }) => {
   }, []);
 
   const handleOpenEditPopup = useCallback(
-    (book) => () => {
+    (user) => () => {
       setPopupType('edit');
       setEditPopupOpen(true);
-      setSelectedBook(book);
+      setSelectedUser(user);
     },
     [],
   );
 
   const handleCloseEditPopup = useCallback(() => {
     setEditPopupOpen(false);
-    setSelectedBook(null);
+    setSelectedUser(null);
   }, []);
 
-  const addBook = useCallback(
-    async (book) => {
+  const addUser = useCallback(
+    async (user) => {
       try {
-        const addedBook = await (await Axios.post('/books', book)).data;
-        bookAdded(addedBook);
+        const addedUser = await (await Axios.post('/users', user)).data;
+        userAdded(addedUser);
       } catch (e) {
         console.log(e);
       }
     },
-    [bookAdded],
+    [userAdded],
   );
-  const editBook = useCallback(
-    async (book) => {
+  const editUser = useCallback(
+    async (user) => {
       try {
-        await Axios.put('/books', book);
-        bookUpdated(book);
+        await Axios.put('/users', user);
+        userUpdated(user);
       } catch (e) {
         console.log(e);
       }
     },
-    [bookUpdated],
+    [userUpdated],
   );
 
-  const deleteBook = useCallback(
+  const deleteUser = useCallback(
     (id) => async () => {
       try {
-        await Axios.delete('/books', { data: { id } });
-        bookRemoved(books.findIndex((book) => book.id === id));
+        await Axios.delete('/users', { data: { id } });
+        userRemoved(users.findIndex((user) => user.id === id));
       } catch (e) {}
     },
-    [bookRemoved, books],
+    [userRemoved, users],
   );
 
-  const bookRows = useMemo(() => {
-    const rowsData = books.map((book) => {
-      const { id, code, name, author, publHouse, year, genre, copies } = book;
-      return { id, code, name, author, publHouse, year, genre, copies };
+  const userRows = useMemo(() => {
+    const rowsData = users.map((user) => {
+      const { id, username, email, firstName, lastName, isAdmin } = user;
+      return { id, username, email, firstName, lastName, isAdmin };
     });
     return rowsData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
       return (
@@ -137,14 +136,14 @@ const BooksTable = ({ books, bookAdded, bookUpdated, bookRemoved }) => {
             <IconButton onClick={handleOpenEditPopup(row)} aria-label='edit'>
               <EditIcon />
             </IconButton>
-            <IconButton onClick={deleteBook(row.id)} aria-label='delete'>
+            <IconButton onClick={deleteUser(row.id)} aria-label='delete'>
               <DeleteIcon />
             </IconButton>
           </TableCell>
         </TableRow>
       );
     });
-  }, [books, columns, deleteBook, handleOpenEditPopup, page, rowsPerPage]);
+  }, [users, columns, deleteUser, handleOpenEditPopup, page, rowsPerPage]);
 
   return (
     <>
@@ -163,26 +162,26 @@ const BooksTable = ({ books, bookAdded, bookUpdated, bookRemoved }) => {
                 </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>{bookRows}</TableBody>
+            <TableBody>{userRows}</TableBody>
           </Table>
         </div>
         <TablePagination
           rowsPerPageOptions={rowsPerPageOptions}
           component='div'
-          count={books.length}
+          count={users.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-      <EditBookPopup
+      <EditUserPopup
         open={editPopupOpen}
         handleClose={handleCloseEditPopup}
         type={popupType}
-        book={selectedBook}
-        addBook={addBook}
-        editBook={editBook}
+        user={selectedUser}
+        addUser={addUser}
+        editUser={editUser}
       />
       <ButtonGroup
         variant='contained'
@@ -191,12 +190,12 @@ const BooksTable = ({ books, bookAdded, bookUpdated, bookRemoved }) => {
         aria-label='contained primary button group'
       >
         <Button onClick={handleOpenAddPopup} endIcon={<AddIcon />}>
-          Add a book
+          Add a user
         </Button>
-        <Button endIcon={<PlaylistAddIcon />}>Add multiple books</Button>
+        {/* <Button endIcon={<PlaylistAddIcon />}>Add multiple users</Button> */}
       </ButtonGroup>
     </>
   );
 };
 
-export default BooksTable;
+export default UsersTable;
