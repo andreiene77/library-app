@@ -16,6 +16,7 @@ module.exports = ({ sequelize, DataTypes: { STRING, BOOLEAN } }) => {
       },
       firstName: STRING,
       lastName: STRING,
+      contact: STRING,
       isAdmin: BOOLEAN,
     },
     {},

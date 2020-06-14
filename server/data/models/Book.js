@@ -20,6 +20,7 @@ module.exports = ({ sequelize, DataTypes: { STRING, INTEGER } }) => {
   );
   Book.associate = (models) => {
     Book.hasMany(models.action);
+    Book.belongsTo(models.place);
   };
   return Book;
 };

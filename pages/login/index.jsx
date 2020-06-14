@@ -1,4 +1,4 @@
-import { Box, Button, Container, Grid, IconButton, InputAdornment, Snackbar } from '@material-ui/core';
+import { Box, Button, Container, Grid, IconButton, InputAdornment, Snackbar, Typography } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
@@ -100,6 +100,9 @@ const Login = () => {
                     ) : (
                       ''
                     )}
+                    <Typography variant='h2' gutterBottom>
+                      Login
+                    </Typography>
                     <AuthField name='username' placeholder='username' />
                     <AuthField
                       type={showPassword ? 'text' : 'password'}

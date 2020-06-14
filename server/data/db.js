@@ -455,7 +455,7 @@ sequelize
     console.log('Initialize db.');
     Object.values(models).forEach((modelObject) => modelObject({ sequelize, DataTypes }));
     Object.values(sequelize.models).forEach((model) => model.associate && model.associate(sequelize.models));
-    sequelize.sync();
+    sequelize.sync({ force: true });
     sequelize.seed = addBooksToTable;
   });
 

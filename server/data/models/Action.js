@@ -1,4 +1,4 @@
-module.exports = ({ sequelize, DataTypes: { STRING, DATEONLY, BOOLEAN } }) => {
+module.exports = ({ sequelize, DataTypes: { STRING, DATEONLY, BOOLEAN, BLOB } }) => {
   const Action = sequelize.define(
     'action',
     {
@@ -17,6 +17,12 @@ module.exports = ({ sequelize, DataTypes: { STRING, DATEONLY, BOOLEAN } }) => {
       confirmed: {
         type: BOOLEAN,
         allowNull: false,
+      },
+      proofImg: {
+        type: BLOB,
+      },
+      proofText: {
+        type: STRING,
       },
     },
     {},
