@@ -1,29 +1,39 @@
+const dotenv = require('dotenv');
 const express = require('express');
 const next = require('next');
-const db = require('./data/db');
+const fileUpload = require('express-fileupload');
+const morgan = require('morgan');
+const container = require('./DIContainer');
 
-const BooksController = require('./business/controllers/BooksController');
-const UsersController = require('./business/controllers/UsersController');
-const ActionsController = require('./business/controllers/ActionsController');
-
+dotenv.config();
 const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+const app = next({ dev, quiet: true });
 const handle = app.getRequestHandler();
 
 app
   .prepare()
   .then(() => {
-    const server = express();
+    const server = container.get('server');
     server.use(express.json());
+    server.use(
+      fileUpload({
+        createParentPath: true,
+      }),
+    );
+    server.use(morgan('dev'));
 
-    UsersController(server, db);
-    BooksController(server, db);
-    ActionsController(server, db);
+    server.use(container.get('booksController'));
+    server.use(container.get('usersController'));
+    server.use(container.get('actionsController'));
+    // const db = container.get('db');
 
-    server.post('/seed', (req, res) => {
-      db.seed();
-      res.sendStatus(200);
-    });
+    // container.get('proofsController');
+    // container.get('placesController');
+
+    // server.get('/seed', (req, res) => {
+    //   db.seed();
+    //   res.sendStatus(200);
+    // });
     server.get('*', (req, res) => handle(req, res));
 
     server.listen(3000, (err) => {

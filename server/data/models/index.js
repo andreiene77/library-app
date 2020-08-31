@@ -1,9 +1,10 @@
-/* eslint-disable import/no-dynamic-require */
-/* eslint-disable global-require */
-const normalizedPath = require('path').join(__dirname, '/');
-
 require('fs')
-  .readdirSync(normalizedPath)
+  .readdirSync(__dirname)
   .forEach((file) => {
-    if (file !== 'index.js') module.exports[file.replace('.js', '')] = require(`./${file}`);
+    if (file !== 'index.js') {
+      const moduleName = file.split('.')[0];
+      exports[moduleName] = require(`./${moduleName}`);
+    }
   });
+
+// const normalizedPath = require('path').join(__dirname, '/');

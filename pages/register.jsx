@@ -4,24 +4,34 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Axios from 'axios';
 import { Form, Formik } from 'formik';
-import Router from 'next/router';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Loader from 'react-loader-spinner';
 import * as yup from 'yup';
-import theme from '../../assets/theme';
-import AuthField from '../../components/AuthField';
-import PageLoader from '../../components/PageLoader';
+import theme from '../assets/theme';
+import AuthField from '../components/AuthField';
+import PageLoader from '../components/PageLoader';
+import { actionTypes, useStudentContext } from '../contexts/studentContext';
+import { USERS_ROUTE } from '../utils/apiRoutes';
+
+const { SET_TOKENS, SET_USER } = actionTypes;
 
 const validationSchema = yup.object({
   username: yup.string().required().max(20).min(4),
   password: yup.string().required().max(20).min(4),
+  email: yup.string().required().max(70).min(5).email(),
+  firstName: yup.string().max(70).min(2),
+  lastName: yup.string().max(70).min(2),
 });
 
 const styles = {
   formGrid: { minHeight: '90vh' },
 };
 
-const Login = () => {
+const Register = () => {
+  const [, dispatch] = useStudentContext();
+
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -29,6 +39,7 @@ const Login = () => {
     () => ({
       username: '',
       password: '',
+      email: '',
     }),
     [],
   );
@@ -37,13 +48,20 @@ const Login = () => {
   const onSubmit = useCallback(async (data, { setSubmitting }) => {
     setSubmitting(true);
     try {
-      const response = await Axios.post('/login', data);
+      const response = await Axios.post(USERS_ROUTE.POST.REGISTER(), data);
+
       if (response && response.status === 200) {
+        const {
+          user: { id, username, email, firstName, lastName, phone, isAdmin },
+          refreshToken,
+          accessToken,
+        } = response.data;
+        dispatch({ type: SET_TOKENS, refreshToken, accessToken });
+        dispatch({ type: SET_USER, user: { id, username, email, firstName, lastName, phone, isAdmin } });
+
         setErrorMessage('');
-        // TODO: set user to context; response.body
-        Router.push({
-          pathname: '/admin',
-          query: { user: data.username },
+        router.push({
+          pathname: '/student',
         });
         setSubmitting(false);
       } else setErrorMessage('Something went wrong, please try again later.');
@@ -83,7 +101,7 @@ const Login = () => {
   };
   return (
     <ThemeProvider theme={theme}>
-      <PageLoader loaded={loaded} loadingText='loading login form' textSize='body1'>
+      <PageLoader loaded={loaded} loadingText='loading register form' textSize='body1'>
         <Box color='text.primary'>
           <Container maxWidth='xs'>
             <Formik
@@ -101,7 +119,7 @@ const Login = () => {
                       ''
                     )}
                     <Typography variant='h2' gutterBottom>
-                      Login
+                      Register
                     </Typography>
                     <AuthField name='username' placeholder='username' />
                     <AuthField
@@ -110,8 +128,11 @@ const Login = () => {
                       placeholder='password'
                       InputProps={passwordInputProps}
                     />
-                    <Button disabled={isSubmitting} type='submit' variant='contained' color='primary'>
-                      submit
+                    <AuthField name='email' placeholder='Email' />
+                    <AuthField name='firstName' placeholder='First Name' />
+                    <AuthField name='lastName' placeholder='Last Name' />
+                    <Button disabled={isSubmitting} type='submit' variant='contained' color='primary' size='large'>
+                      Submit
                     </Button>
                     <Snackbar
                       open={!!errorMessage}
@@ -130,4 +151,4 @@ const Login = () => {
   );
 };
 
-export default React.memo(Login);
+export default React.memo(Register);

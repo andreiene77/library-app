@@ -1,26 +1,32 @@
-module.exports = ({ sequelize, DataTypes: { STRING, INTEGER } }) => {
-  const Book = sequelize.define(
-    'book',
+const { model, Schema } = require('mongoose');
+
+const BookSchema = new Schema({
+  code: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  author: {
+    type: String,
+    required: true,
+  },
+  publHouse: String,
+  year: Number,
+  genre: String,
+  copies: Number,
+  place: {
+    type: Schema.Types.ObjectId,
+    ref: 'Place',
+  },
+  actions: [
     {
-      code: STRING,
-      name: {
-        type: STRING,
-        allowNull: false,
-      },
-      author: {
-        type: STRING,
-        allowNull: false,
-      },
-      publHouse: STRING,
-      year: INTEGER,
-      genre: STRING,
-      copies: INTEGER,
+      type: Schema.Types.ObjectId,
+      ref: 'Action',
     },
-    {},
-  );
-  Book.associate = (models) => {
-    Book.hasMany(models.action);
-    Book.belongsTo(models.place);
-  };
-  return Book;
-};
+  ],
+});
+
+module.exports = model('Book', BookSchema);

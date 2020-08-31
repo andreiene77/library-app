@@ -1,18 +1,24 @@
 import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
-import GroupIcon from '@material-ui/icons/Group';
-import BallotIcon from '@material-ui/icons/Ballot';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
+import SearchIcon from '@material-ui/icons/Search';
+import BallotIcon from '@material-ui/icons/Ballot';
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookIcon from '@material-ui/icons/Book';
+import AssignmentReturnIcon from '@material-ui/icons/AssignmentReturn';
 import React from 'react';
 
-const AdminDrawer = ({ isOpen, openDrawer, closeDrawer, page, setPage }) => {
+const StudentDrawer = ({ isOpen, openDrawer, closeDrawer, page, setPage }) => {
   return (
     <Drawer anchor='left' open={isOpen} onClose={closeDrawer}>
       <div style={{ width: 250 }} role='presentation' onClick={closeDrawer} onKeyDown={closeDrawer}>
         <List>
           {[
             { text: 'Books', icon: <MenuBookIcon /> },
-            { text: 'Users', icon: <GroupIcon /> },
+            { text: 'Search by quote', icon: <SearchIcon /> },
             { text: 'Actions', icon: <BallotIcon /> },
+            { text: 'Book a book', icon: <BookmarkIcon /> },
+            { text: 'Borrow a book', icon: <BookIcon /> },
+            { text: 'Return a book', icon: <AssignmentReturnIcon /> },
           ].map((pageItem) => (
             <ListItem
               button
@@ -33,4 +39,4 @@ const AdminDrawer = ({ isOpen, openDrawer, closeDrawer, page, setPage }) => {
   );
 };
 
-export default AdminDrawer;
+export default StudentDrawer;

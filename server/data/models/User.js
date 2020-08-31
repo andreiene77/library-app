@@ -1,28 +1,30 @@
-module.exports = ({ sequelize, DataTypes: { STRING, BOOLEAN } }) => {
-  const User = sequelize.define(
-    'user',
+const { model, Schema } = require('mongoose');
+
+const UserSchema = new Schema({
+  username: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  refreshTokens: [String],
+  email: {
+    type: String,
+    required: true,
+  },
+  firstName: String,
+  lastName: String,
+  phone: String,
+  isAdmin: Boolean,
+  blocked: Boolean,
+  actions: [
     {
-      username: {
-        type: STRING,
-        allowNull: false,
-      },
-      password: {
-        type: STRING,
-        allowNull: false,
-      },
-      email: {
-        type: STRING,
-        allowNull: false,
-      },
-      firstName: STRING,
-      lastName: STRING,
-      contact: STRING,
-      isAdmin: BOOLEAN,
+      type: Schema.Types.ObjectId,
+      ref: 'Action',
     },
-    {},
-  );
-  User.associate = (models) => {
-    User.hasMany(models.action);
-  };
-  return User;
-};
+  ],
+});
+
+module.exports = model('User', UserSchema);

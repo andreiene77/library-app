@@ -1,19 +1,19 @@
-import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
-import { orange, lightBlue, red, deepOrange, grey } from '@material-ui/core/colors'
+import { deepOrange, grey, red } from '@material-ui/core/colors';
+import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles';
 
 const theme = responsiveFontSizes(
-    createMuiTheme({
-        palette: {
-            primary: deepOrange,
-            secondary: grey,
-            error: red,
-            contrastThreshold: 3,
-            tonalOffset: 0.2
-        },
-        status: {
-            danger: 'red'
-        }
-    })
-)
+  createMuiTheme({
+    palette: {
+      primary: deepOrange,
+      secondary: grey,
+      error: red,
+      contrastThreshold: 3,
+      tonalOffset: 0.2,
+    },
+    status: {
+      danger: 'red',
+    },
+  }),
+);
 
-export default theme
+export default theme;

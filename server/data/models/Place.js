@@ -1,15 +1,15 @@
-module.exports = ({ sequelize, DataTypes: { STRING, INTEGER } }) => {
-  const Place = sequelize.define(
-    'place',
+const { model, Schema } = require('mongoose');
+
+const PlaceSchema = new Schema({
+  room: String,
+  drawer: String,
+  row: String,
+  books: [
     {
-      room: STRING,
-      drawer: STRING,
-      row: STRING,
+      type: Schema.Types.ObjectId,
+      ref: 'Book',
     },
-    {},
-  );
-  Place.associate = (models) => {
-    Place.hasMany(models.book);
-  };
-  return Place;
-};
+  ],
+});
+
+module.exports = model('Place', PlaceSchema);

@@ -1,35 +1,36 @@
-module.exports = ({ sequelize, DataTypes: { STRING, DATEONLY, BOOLEAN, BLOB } }) => {
-  const Action = sequelize.define(
-    'action',
-    {
-      type: {
-        type: STRING, // oneOf: booking, borrowing, return
-        allowNull: false,
-      },
-      deadline: {
-        type: DATEONLY,
-        allowNull: false,
-      },
-      state: {
-        type: STRING, // oneOf: picked up, extended, overdue, returned, canceled
-        allowNull: false,
-      },
-      confirmed: {
-        type: BOOLEAN,
-        allowNull: false,
-      },
-      proofImg: {
-        type: BLOB,
-      },
-      proofText: {
-        type: STRING,
-      },
-    },
-    {},
-  );
-  Action.associate = (models) => {
-    Action.belongsTo(models.book);
-    Action.belongsTo(models.user);
-  };
-  return Action;
-};
+const { model, Schema } = require('mongoose');
+const actionStates = require('../../../utils/actionState');
+
+const ActionSchema = new Schema({
+  createDate: {
+    type: Date,
+    required: true,
+  },
+  lastUpdate: {
+    type: Date,
+    required: true,
+  },
+  deadline: {
+    type: Date,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+    enum: Object.values(actionStates),
+  },
+  proof: {
+    type: Schema.Types.ObjectId,
+    ref: 'Proof',
+  },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  book: {
+    type: Schema.Types.ObjectId,
+    ref: 'Book',
+  },
+});
+
+module.exports = model('Action', ActionSchema);
