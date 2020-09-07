@@ -82,26 +82,18 @@ container.register('router', express.Router);
 container.memorize('book', Book);
 container.memorize('user', User);
 container.memorize('action', Action);
-// container.memorize('proof', Proof);
-// container.memorize('place', Place);
 
 container.singleton('booksRepo', Repository, ['book']);
 container.singleton('usersRepo', Repository, ['user']);
 container.singleton('actionsRepo', Repository, ['action']);
-// container.singleton('proofsRepo', Repository, ['proof']);
-// container.singleton('placesRepo', Repository, ['place']);
 
 container.singleton('booksService', BooksService, ['booksRepo']);
 container.singleton('usersService', UsersService, ['usersRepo']);
-container.singleton('actionsService', ActionsService, ['actionsRepo', 'usersRepo']);
-// container.singleton('proofsService', ProofsService, ['proofsRepo']);
-// container.singleton('placesService', PlacesService, ['placesRepo']);
+container.singleton('actionsService', ActionsService, ['actionsRepo', 'usersRepo', 'booksRepo']);
 
 container.singleton('booksController', BooksController, ['router', 'booksService', 'middleware']);
 container.singleton('usersController', UsersController, ['router', 'usersService', 'middleware']);
 container.singleton('actionsController', ActionsController, ['router', 'actionsService', 'middleware']);
-// container.singleton('proofsController', ProofsController, ['router', 'proofsService','middleware']);
-// container.singleton('placesController', PlacesController, ['router', 'placesService','middleware']);
 
 container.register('middleware', middleware, ['usersService']);
 

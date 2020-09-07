@@ -25,7 +25,7 @@ class UsersService {
 
     const refreshToken = sign({ username }, process.env.REFRESH_TOKEN_SECRET);
     const accessToken = sign({ username }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '10m',
+      expiresIn: '20m',
     });
     await this.repo.update({ _id: user._id }, { refreshTokens: [...user.refreshTokens, refreshToken] });
     return { user, refreshToken, accessToken };
@@ -40,7 +40,7 @@ class UsersService {
     if (user) return null;
     const hashedPassword = await hash(password, 10);
     const accessToken = sign({ username }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '10m',
+      expiresIn: '20m',
     });
     const refreshToken = sign({ username }, process.env.REFRESH_TOKEN_SECRET);
     const newUserData = {

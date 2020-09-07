@@ -45,7 +45,7 @@ export const useActions = ({ initialActions = [], users = [], books = [], notAdm
   );
 
   const deleteAction = useCallback(
-    async ({ id }) => {
+    async ({ _id: id }) => {
       try {
         mutate(
           fetcherKey,

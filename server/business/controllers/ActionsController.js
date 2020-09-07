@@ -73,6 +73,7 @@ module.exports = function ActionsController(router, service, { authenticateToken
       const action = await service.saveAction({
         bookId: req.body.bookId,
         username: req.user.username,
+        deadline: req.body.deadline,
       });
       if (action === null) res.sendStatus(400);
       const { _id: id, createDate, lastUpdate, deadline, state, user, book } = action;
@@ -96,6 +97,26 @@ module.exports = function ActionsController(router, service, { authenticateToken
   router.put(PUT.USER_CANCEL_BOOKING(), authenticateToken, async (req, res) => {
     try {
       await service.cancelBooking(req.body.id);
+      res.sendStatus(204);
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(500);
+    }
+  });
+
+  router.put(PUT.ADMIN_ACCEPT_BOOKING(), authenticateToken, async (req, res) => {
+    try {
+      await service.bookingAccepted(req.body.id);
+      res.sendStatus(204);
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(500);
+    }
+  });
+
+  router.put(PUT.ADMIN_DECLINE_BOOKING(), authenticateToken, async (req, res) => {
+    try {
+      await service.bookingDeclined(req.body.id);
       res.sendStatus(204);
     } catch (e) {
       console.log(e);
@@ -185,9 +206,10 @@ module.exports = function ActionsController(router, service, { authenticateToken
 
   router.delete(DELETE(':id'), authenticateToken, async (req, res) => {
     try {
-      await service.deleteBook(req.params.id);
+      await service.deleteAction(req.params.id);
       res.sendStatus(204);
     } catch (e) {
+      console.error(e);
       res.sendStatus(500);
     }
   });

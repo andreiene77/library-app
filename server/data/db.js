@@ -1,4 +1,7 @@
 const { connect, connection } = require('mongoose');
+const { collection } = require('./models/Book');
+const Book = require('./models/Book');
+const rooms = require('../../utils/rooms');
 
 connect('mongodb://andreiene:pass@localhost', { useNewUrlParser: true, dbName: 'library' });
 const db = connection;
@@ -8,17 +11,14 @@ db.once('open', () => {
   console.log(' >> Connection to db successful!');
 });
 
-// db.seed = () => {
-//   const usersModels = usersSeed.map((user) => new User(user));
-//   collection.insertMany(usersModels, (e, users) => {
-//     if (e) return console.error(` >> couldn't save the ${users.insertedCount} users`, e);
-//     return console.log(` >> ${users.insertedCount} users saved successfully`);
-//   });
-//   const booksModels = booksSeed.map((book) => new Book(book));
-//   _collection.insertMany(booksModels, (e, books) => {
-//     if (e) return console.error(` >> couldn't save the ${books.insertedCount} books`, e);
-//     return console.log(` >> ${books.insertedCount} books saved successfully`);
-//   });
-// };
+db.seed = async () => {
+  // const books = await Book.find({});
+  // // const getRandVal = (obj) => Object.values(obj)[Math.floor(Math.random() * Math.floor(Object.values(obj).length))];
+  // books.forEach(async (book) => {
+  //   await Book.updateOne(book, {
+  //     copies: Math.floor(Math.random() * Math.floor(10)) + 1,
+  //   });
+  // });
+};
 
 module.exports = db;

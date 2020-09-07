@@ -5,6 +5,7 @@ const BOOKS_ROUTE = {
     BY_WORD: (word) => `${BOOKS_ROUTE.BASE}/${word}`,
     BY_NAME_AUTHOR: (name, author) => `${BOOKS_ROUTE.BASE}/${name}/${author}`,
     BY_QUOTE: (quote) => `${BOOKS_ROUTE.BASE}/${quote}`,
+    BLOCKED_BOOKS: (id) => `${BOOKS_ROUTE.BASE}/blockedBooks/${id}`,
   },
   POST: {
     ONE: () => `${BOOKS_ROUTE.BASE}/one`,
@@ -58,6 +59,8 @@ const ACTIONS_ROUTE = {
     // CONFIRM_BOOKING,
     // ADMIN_CANCEL,
     USER_CANCEL_BOOKING: () => `${ACTIONS_ROUTE.BASE}/cancelBooking`,
+    ADMIN_ACCEPT_BOOKING: () => `${ACTIONS_ROUTE.BASE}/adminAcceptBooking`,
+    ADMIN_DECLINE_BOOKING: () => `${ACTIONS_ROUTE.BASE}/adminDeclineBooking`,
     USER_PICKED_UP: () => `${ACTIONS_ROUTE.BASE}/userPickedUp`,
     ADMIN_CONFIRM_BORROW: () => `${ACTIONS_ROUTE.BASE}/adminConfirmBorrow`,
     ADMIN_DENY_BORROW: () => `${ACTIONS_ROUTE.BASE}/adminDenyBorrow`,

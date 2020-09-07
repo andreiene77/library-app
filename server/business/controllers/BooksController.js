@@ -13,7 +13,7 @@ module.exports = function BookController(router, service, { authenticateToken, a
     try {
       const books = await service.getAll();
       return res.json(
-        books.map(({ _id: id, code, name, author, publHouse, year, genre, copies }) => ({
+        books.map(({ _id: id, code, name, author, publHouse, year, genre, copies, place, blockedBooks }) => ({
           id,
           code,
           name,
@@ -22,11 +22,24 @@ module.exports = function BookController(router, service, { authenticateToken, a
           year,
           genre,
           copies,
+          place: `${place.room} - ${place.drawer}/${place.row}`,
+          blockedBooks,
         })),
       );
     } catch (e) {
       console.log(e);
       return res.sendStatus(500);
+    }
+  });
+
+  router.get(GET.BLOCKED_BOOKS(':id'), authenticateToken, async (req, res) => {
+    try {
+      const blockedBooks = await service.getBlockedBooks(req.params.id);
+      if (blockedBooks === null) res.sendStatus(400);
+      res.json(blockedBooks);
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(500);
     }
   });
 

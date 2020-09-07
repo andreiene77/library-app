@@ -1,6 +1,7 @@
 const actionStates = {
   BOOKING_REQUESTED: 'booking requested',
-  PICK_UP_SCHEDULED: 'pick-up scheduled',
+  BOOKING_ACCEPTED: 'booking accepted',
+  BOOKING_DECLINED: 'booking declined',
   CANCELED_BY_ADMIN: 'canceled by admin',
   CANCELED_BY_USER: 'canceled by user',
   CANCELED_BY_OVERDUE: 'canceled by overdue',

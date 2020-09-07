@@ -17,13 +17,18 @@ const AdminInterface = ({ fetchedBooks, fetchedUsers, fetchedActions }) => {
   const [page, setPage] = useState('Actions');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
-  const { books, isLoading: booksLoading, isError: booksError, addBook, modifyBook, deleteBook } = useBooks({
-    initialBooks: fetchedBooks,
-  });
-  const { users, isLoading: usersLoading, isError: usersError, addUser, modifyUser, deleteUser } = useUsers({
-    initialUsers: fetchedUsers,
-  });
+  const { books, booksNames, isLoading: booksLoading, isError: booksError, addBook, modifyBook, deleteBook } = useBooks(
+    {
+      initialBooks: fetchedBooks,
+    },
+  );
+  const { users, usersNames, isLoading: usersLoading, isError: usersError, addUser, modifyUser, deleteUser } = useUsers(
+    {
+      initialUsers: fetchedUsers,
+    },
+  );
   const {
+    fetcherKey,
     actions,
     isLoading: actionsLoading,
     isError: actionsError,
@@ -47,17 +52,14 @@ const AdminInterface = ({ fetchedBooks, fetchedUsers, fetchedActions }) => {
               actions &&
               actions.map((action) => ({
                 ...action,
-                book: books
-                  ? (books.find((book) => book.id === action.book) || { name: action.book }).name
-                  : action.book,
-                user: users
-                  ? (users.find((user) => user.id === action.user) || { username: action.user }).username
-                  : action.user,
+                book: (booksNames && booksNames[action.book]) || action.book,
+                user: (usersNames && usersNames[action.user]) || action.user,
               }))
             }
             addAction={addAction}
             modifyAction={modifyAction}
             deleteAction={deleteAction}
+            fetcherKey={fetcherKey}
           />
         );
       default:
@@ -69,14 +71,17 @@ const AdminInterface = ({ fetchedBooks, fetchedUsers, fetchedActions }) => {
     addBook,
     addUser,
     books,
+    booksNames,
     deleteAction,
     deleteBook,
     deleteUser,
+    fetcherKey,
     modifyAction,
     modifyBook,
     modifyUser,
     page,
     users,
+    usersNames,
   ]);
 
   const openDrawer = useCallback(() => {

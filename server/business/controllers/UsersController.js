@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 const { Router } = require('express');
 const { USERS_ROUTE } = require('../../../utils/apiRoutes');

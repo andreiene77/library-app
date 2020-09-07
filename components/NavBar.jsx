@@ -11,7 +11,11 @@ import MailIcon from '@material-ui/icons/Mail';
 import MenuIcon from '@material-ui/icons/Menu';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { poster } from '../utils/fetcher';
+import { useStudentContext, actionTypes } from '../contexts/studentContext';
+import { useRouter } from 'next/router';
+import { USERS_ROUTE } from '../utils/apiRoutes';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -78,8 +82,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function NavBar({ title, DrawerComponent, drawerProps, openDrawer, closeDrawer }) {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const router = useRouter();
+  const [{ refreshToken }, dispatch] = useStudentContext();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -101,9 +107,13 @@ export default function NavBar({ title, DrawerComponent, drawerProps, openDrawer
     setMobileMoreAnchorEl(event.currentTarget);
   }, []);
 
-  const handleLogout = () => {
-    post;
-  };
+  const handleLogout = useCallback(async () => {
+    await poster(USERS_ROUTE.POST.LOGOUT(), { refreshToken });
+    dispatch({ type: actionTypes.LOGOUT });
+    router.push({
+      pathname: '/login',
+    });
+  }, [dispatch, refreshToken, router]);
 
   const menuId = 'primary-search-account-menu';
   const mobileMenuId = 'primary-search-account-menu-mobile';

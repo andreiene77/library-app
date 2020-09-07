@@ -4,6 +4,7 @@ export const actionTypes = {
   INITIALIZE_TOKENS: 'initialize_tokens',
   SET_TOKENS: 'set_tokens',
   SET_USER: 'set_user',
+  LOGOUT: 'logout',
 };
 
 const initialState = {
@@ -12,7 +13,6 @@ const initialState = {
   refreshToken: '',
 };
 const reducer = (state, action) => {
-  console.log('reducer -> action', action);
   switch (action.type) {
     case actionTypes.INITIALIZE_TOKENS:
       return {
@@ -32,6 +32,13 @@ const reducer = (state, action) => {
       return {
         ...state,
         user: action.user,
+      };
+    case actionTypes.LOGOUT:
+      return {
+        ...state,
+        user: {},
+        accessToken: '',
+        refreshToken: '',
       };
     default:
       return state;

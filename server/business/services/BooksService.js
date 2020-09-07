@@ -16,6 +16,12 @@ class BooksService {
     return this.repo.getAll();
   }
 
+  async getBlockedBooks() {
+    const book = await this.repo.getOne({ _id: id });
+    if (!book) return null;
+    return book.blockedBooks || new Map();
+  }
+
   /**
    * @param {String} name
    * @param {String} author
@@ -43,7 +49,7 @@ class BooksService {
     });
   }
 
-  async saveBook({ code, name, author, publHouse, year, genre, copies }) {
+  async saveBook({ code, name, author, publHouse, year, genre, copies, place = null }) {
     const book = await this.repo.getOne({ code });
     console.log('BooksService -> saveBook -> found duplicate book', book);
     if (book) return null;
@@ -55,7 +61,7 @@ class BooksService {
       year,
       genre,
       copies,
-      place: null,
+      place,
       actions: [],
     });
   }

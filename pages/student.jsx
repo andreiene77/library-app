@@ -7,7 +7,6 @@ import Booking from '../components/Booking';
 import BooksList from '../components/BooksList';
 import NavBar from '../components/NavBar';
 import PageLoader from '../components/PageLoader';
-import QuoteSearch from '../components/QuoteSearch';
 import StudentDrawer from '../components/StudentDrawer';
 import { useStudentContext } from '../contexts/studentContext';
 import { useActions } from '../hooks/useActions';
@@ -23,7 +22,7 @@ const StudentInterface = ({ fetchedBooks = [], fetchedActions = [] }) => {
   const [page, setPage] = useState('Actions');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
-  const { books, isLoading, isError } = useBooks({ initialBooks: fetchedBooks });
+  const { books, booksNames, isLoading, isError } = useBooks({ initialBooks: fetchedBooks });
   const {
     fetcherKey,
     actions,
@@ -38,8 +37,8 @@ const StudentInterface = ({ fetchedBooks = [], fetchedActions = [] }) => {
   });
   // const { actions, isLoading, isError } = useActions({ initialActions: fetchedActions });
   const bookBook = useCallback(
-    async (book) => {
-      await poster(ACTIONS_ROUTE.POST.USER_CREATE_BOOKING(), { bookId: book.id }, accessToken);
+    async (book, deadline) => {
+      await poster(ACTIONS_ROUTE.POST.USER_CREATE_BOOKING(), { bookId: book.id, deadline }, accessToken);
       mutate(fetcherKey);
     },
     [accessToken, fetcherKey],
@@ -88,9 +87,7 @@ const StudentInterface = ({ fetchedBooks = [], fetchedActions = [] }) => {
               actions &&
               actions.map((action) => ({
                 ...action,
-                book: books
-                  ? (books.find((book) => book.id === action.book) || { name: action.book }).name
-                  : action.book,
+                book: (booksNames && booksNames[action.book]) || action.book,
               }))
             }
             cancelBooking={cancelBooking}
@@ -99,14 +96,12 @@ const StudentInterface = ({ fetchedBooks = [], fetchedActions = [] }) => {
             userReturn={userReturn}
           />
         );
-      case 'Search by quote':
-        return <QuoteSearch />;
       case 'Book a book':
-        return <Booking books={books} bookBook={bookBook} />;
+        return <Booking books={books} bookBook={bookBook} setPage={setPage} />;
       default:
         return null;
     }
-  }, [actions, bookBook, books, cancelBooking, page, userPickedUp, userRequestExtend, userReturn]);
+  }, [actions, bookBook, books, booksNames, cancelBooking, page, userPickedUp, userRequestExtend, userReturn]);
 
   const openDrawer = useCallback(() => {
     setDrawerOpen(true);

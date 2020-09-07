@@ -64,6 +64,12 @@ export const useUsers = ({ initialUsers = [] }) => {
 
   return {
     users: data,
+    usersNames:
+      data &&
+      data.reduce((names, user) => {
+        names[user.id] = user.username;
+        return names;
+      }, {}),
     isLoading: !error && !data,
     isError: error,
     addUser,

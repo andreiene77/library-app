@@ -15,25 +15,21 @@ app
   .then(() => {
     const server = container.get('server');
     server.use(express.json());
-    server.use(
-      fileUpload({
-        createParentPath: true,
-      }),
-    );
+    server.use(fileUpload({ createParentPath: true }));
     server.use(morgan('dev'));
 
     server.use(container.get('booksController'));
     server.use(container.get('usersController'));
     server.use(container.get('actionsController'));
-    // const db = container.get('db');
+    const db = container.get('db');
 
     // container.get('proofsController');
     // container.get('placesController');
 
-    // server.get('/seed', (req, res) => {
-    //   db.seed();
-    //   res.sendStatus(200);
-    // });
+    server.get('/seed', (req, res) => {
+      db.seed();
+      res.sendStatus(200);
+    });
     server.get('*', (req, res) => handle(req, res));
 
     server.listen(3000, (err) => {

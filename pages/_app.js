@@ -21,7 +21,6 @@ const MyApp = ({ Component, pageProps }) => {
   return (
     <AdminProvider reducer={reducer}>
       <StudentProvider>
-        <link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons' />
         <CssBaseline />
         <PageHeader />
         <Component {...pageProps} />

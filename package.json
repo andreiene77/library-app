@@ -8,12 +8,15 @@
     "start": "NODE_ENV=production node server/server.mjs"
   },
   "dependencies": {
+    "@date-io/date-fns": "^1.3.13",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/pickers": "^3.2.10",
     "@material-ui/styles": "^4.10.0",
     "axios": "^0.19.2",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
+    "date-fns": "^2.16.1",
     "dotenv": "^8.2.0",
     "eslint-plugin-react-perf": "^3.2.4",
     "express": "^4.17.1",
@@ -23,6 +26,7 @@
     "jwt-decode": "^2.2.0",
     "lodash.debounce": "^4.0.8",
     "material-table": "^1.69.0",
+    "mongodb-schema": "^8.2.5",
     "mongoose": "^5.10.1",
     "morgan": "^1.10.0",
     "mysql2": "^2.1.0",

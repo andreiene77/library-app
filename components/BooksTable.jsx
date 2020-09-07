@@ -4,11 +4,11 @@ import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import { makeStyles } from '@material-ui/styles';
 import MaterialTable from 'material-table';
 import React, { useCallback, useMemo } from 'react';
-import theme from '../assets/theme';
-import { poster } from '../utils/fetcher';
-import { BOOKS_ROUTE } from '../utils/apiRoutes';
-import { useStudentContext } from '../contexts/studentContext';
 import { mutate } from 'swr';
+import theme from '../assets/theme';
+import { useStudentContext } from '../contexts/studentContext';
+import { BOOKS_ROUTE } from '../utils/apiRoutes';
+import { poster } from '../utils/fetcher';
 
 const useStyles = makeStyles({
   btn_group_root: {
@@ -33,6 +33,7 @@ const BooksTable = ({ books, addBook, modifyBook, deleteBook }) => {
       { field: 'year', title: 'Year', type: 'numeric' },
       { field: 'genre', title: 'Genre' },
       { field: 'copies', title: 'No. Copies', type: 'numeric' },
+      { field: 'place', title: 'Place', editable: 'never' },
     ],
     [],
   );

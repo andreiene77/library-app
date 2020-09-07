@@ -56,18 +56,25 @@ const Login = () => {
           dispatch({ type: SET_TOKENS, refreshToken, accessToken });
           dispatch({ type: SET_USER, user: { id, username, email, firstName, lastName, phone, isAdmin, blocked } });
           setErrorMessage('');
+
+          console.log('Login -> isAdmin', isAdmin);
+          console.log('Login -> blocked', blocked);
+          if (isAdmin) {
+            router.push({
+              pathname: '/admin',
+            });
+          }
           if (blocked) {
             router.push({
               pathname: '/blocked',
             });
-          } else if (isAdmin)
-            router.push({
-              pathname: '/admin',
-            });
-          else
+          }
+          if (!isAdmin && !blocked) {
             router.push({
               pathname: '/student',
             });
+          }
+
           setSubmitting(false);
         } else setErrorMessage('Something went wrong, please try again later.');
       } catch (error) {

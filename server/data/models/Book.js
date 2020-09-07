@@ -1,32 +1,23 @@
 const { model, Schema } = require('mongoose');
+const rooms = Object.values(require('../../../utils/rooms'));
 
 const BookSchema = new Schema({
-  code: {
-    type: String,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  author: {
-    type: String,
-    required: true,
-  },
+  code: { type: String, required: true },
+  name: { type: String, required: true },
+  author: { type: String, required: true },
   publHouse: String,
   year: Number,
   genre: String,
   copies: Number,
   place: {
-    type: Schema.Types.ObjectId,
-    ref: 'Place',
+    room: { type: String, enum: rooms.map((r) => r.name), required: true },
+    drawer: { type: String, required: true },
+    row: { type: Number, required: true },
   },
-  actions: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Action',
-    },
-  ],
+  blockedBooks: {
+    type: Map,
+    of: Number,
+  },
 });
 
 module.exports = model('Book', BookSchema);

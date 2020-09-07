@@ -8,11 +8,13 @@ class ActionsService {
    *Creates an instance of BooksService.
    * @param {Repository} repo
    * @param {Repository} usersRepo
+   * @param {Repository} booksRepo
    * @memberof BooksService
    */
-  constructor(repo, usersRepo) {
+  constructor(repo, usersRepo, booksRepo) {
     this.repo = repo;
     this.usersRepo = usersRepo;
+    this.booksRepo = booksRepo;
   }
 
   getAll() {
@@ -44,10 +46,12 @@ class ActionsService {
     return action;
   }
 
-  async saveAction({ userId, bookId, username }) {
-    const deadline = new Date();
-    deadline.setDate(deadline.getDate() + 7);
-    console.log('action deadline', deadline);
+  async saveAction({ userId, bookId, username, deadline }) {
+    if (!deadline) {
+      deadline = new Date();
+      deadline.setDate(deadline.getDate() + 7);
+    }
+    deadline = new Date(deadline);
     let action = null;
     if (userId) {
       action = await this.repo.save({
@@ -70,10 +74,19 @@ class ActionsService {
       });
     }
     if (!action) return null;
+    const book = await this.booksRepo.getOne({ _id: bookId });
+    if (!book.blockedBooks) book.blockedBooks = new Map();
+    for (let i = 0; i < 8; i++) {
+      const key = deadline.toDateString();
+      book.blockedBooks.set(key, (book.blockedBooks.get(key) || 0) + 1);
+      deadline.setDate(deadline.getDate() + 1);
+    }
+
+    await this.booksRepo.update({ _id: bookId }, { $set: { blockedBooks: book.blockedBooks } });
     return action;
   }
 
-  async updateAction({ _id, createDate, lastUpdate, deadline, state, userId, user, bookId, book }) {
+  async updateAction({ _id, createDate, lastUpdate, deadline, state }) {
     const { nModified } = await this.repo.update(
       { _id },
       {
@@ -81,8 +94,6 @@ class ActionsService {
         lastUpdate,
         deadline,
         state,
-        // user: new Types.ObjectId(userId || user),
-        // book: new Types.ObjectId(bookId || book),
       },
     );
     if (parseInt(nModified, 10) > 1)
@@ -90,67 +101,139 @@ class ActionsService {
     if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
   }
 
-  async cancelBooking(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.CANCELED_BY_USER });
+  async _changeState(_id, state, deadline) {
+    const { nModified } = await this.repo.update(
+      { _id },
+      deadline ? { state, lastUpdate: new Date(), deadline: new Date(deadline) } : { state, lastUpdate: new Date() },
+    );
     if (parseInt(nModified, 10) > 1)
       console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
     if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+  }
+
+  async cancelBooking(id) {
+    await this._changeState(id, actionStates.CANCELED_BY_USER);
+
+    const { book: bookId } = await this.repo.getOne({ _id: id });
+    const book = await this.booksRepo.getOne({ _id: bookId });
+    if (book) {
+      const action = await this.repo.getOne({ _id: id });
+      const deadline = new Date(action.deadline);
+      if (!book.blockedBooks) book.blockedBooks = new Map();
+      for (let i = 0; i < 8; i++) {
+        const key = deadline.toDateString();
+        book.blockedBooks.set(key, (book.blockedBooks.get(key) || 1) - 1);
+        if (book.blockedBooks.get(key) === 0) book.blockedBooks.delete(key);
+        deadline.setDate(deadline.getDate() + 1);
+      }
+
+      await this.booksRepo.update({ _id: bookId }, { $set: { blockedBooks: book.blockedBooks } });
+    }
+  }
+
+  async bookingAccepted(id) {
+    await this._changeState(id, actionStates.BOOKING_ACCEPTED);
+  }
+
+  async bookingDeclined(id) {
+    await this._changeState(id, actionStates.BOOKING_DECLINED);
+
+    const { book: bookId } = await this.repo.getOne({ _id: id });
+    const book = await this.booksRepo.getOne({ _id: bookId });
+    if (book) {
+      const action = await this.repo.getOne({ _id: id });
+      const deadline = new Date(action.deadline);
+      if (!book.blockedBooks) book.blockedBooks = new Map();
+      for (let i = 0; i < 8; i++) {
+        const key = deadline.toDateString();
+        book.blockedBooks.set(key, (book.blockedBooks.get(key) || 1) - 1);
+        if (book.blockedBooks.get(key) === 0) book.blockedBooks.delete(key);
+        deadline.setDate(deadline.getDate() + 1);
+      }
+
+      await this.booksRepo.update({ _id: bookId }, { $set: { blockedBooks: book.blockedBooks } });
+    }
   }
 
   async userPickUp(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.BORROWED_AWAITING });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    const deadline = new Date();
+    deadline.setDate(deadline.getDate() + 7);
+    await this._changeState(id, actionStates.BORROWED_AWAITING, deadline);
   }
 
   async adminConfirmBorrow(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.BORROWED_CONFIRMED });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    await this._changeState(id, actionStates.BORROWED_CONFIRMED);
   }
 
   async userRequestExtend(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.BORROW_EXTEND_REQUEST });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    await this._changeState(id, actionStates.BORROW_EXTEND_REQUEST);
+
+    const action = await this.repo.getOne({ _id: id });
+    const deadline = new Date(action.deadline);
+    deadline.setDate(deadline.getDate() + 7);
+    const { book: bookId } = await this.repo.getOne({ _id: id });
+    const book = await this.booksRepo.getOne({ _id: bookId });
+    if (book) {
+      if (!book.blockedBooks) book.blockedBooks = new Map();
+      const key = deadline.toDateString();
+      if (book.blockedBooks.get(key) === book.copies) await this._changeState(id, actionStates.BORROW_EXTEND_DECLINED);
+    }
   }
 
   async userRequestAccepted(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.BORROW_EXTEND_ACCEPTED });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    const action = await this.repo.getOne({ _id: id });
+    console.log('userRequestAccepted -> action.deadline', action.deadline);
+    console.log('userRequestAccepted -> action.deadline type: ', typeof action.deadline);
+    const deadline = new Date(action.deadline);
+    deadline.setDate(deadline.getDate() + 7);
+    console.log('userRequestAccepted -> deadline', deadline);
+
+    await this._changeState(id, actionStates.BORROW_EXTEND_ACCEPTED, deadline);
+
+    const { book: bookId } = await this.repo.getOne({ _id: id });
+    const book = await this.booksRepo.getOne({ _id: bookId });
+    if (book) {
+      if (!book.blockedBooks) book.blockedBooks = new Map();
+      for (let i = 0; i < 7; i++) {
+        const key = deadline.toDateString();
+        book.blockedBooks.set(key, (book.blockedBooks.get(key) || 0) + 1);
+        deadline.setDate(deadline.getDate() - 1);
+      }
+
+      await this.booksRepo.update({ _id: bookId }, { $set: { blockedBooks: book.blockedBooks } });
+    }
   }
 
   async userRequestDeclined(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.BORROW_EXTEND_DECLINED });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    await this._changeState(id, actionStates.BORROW_EXTEND_DECLINED);
   }
 
   async userReturned(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.USER_RETURNED });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    await this._changeState(id, actionStates.USER_RETURNED);
   }
 
   async adminConfirmReturn(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.RETURN_CONFIRMED });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    await this._changeState(id, actionStates.RETURN_CONFIRMED);
+
+    const { book: bookId } = await this.repo.getOne({ _id: id });
+    const book = await this.booksRepo.getOne({ _id: bookId });
+    if (book) {
+      const action = await this.repo.getOne({ _id: id });
+      const deadline = new Date(action.deadline);
+      if (!book.blockedBooks) book.blockedBooks = new Map();
+      for (let i = 0; i < 15; i++) {
+        const key = deadline.toDateString();
+        book.blockedBooks.set(key, (book.blockedBooks.get(key) || 1) - 1);
+        if (book.blockedBooks.get(key) === 0) book.blockedBooks.delete(key);
+        deadline.setDate(deadline.getDate() - 1);
+      }
+
+      await this.booksRepo.update({ _id: bookId }, { $set: { blockedBooks: book.blockedBooks } });
+    }
   }
 
   async adminDenyReturn(id) {
-    const { nModified } = await this.repo.update({ _id: id }, { state: actionStates.RETURN_DENIED });
-    if (parseInt(nModified, 10) > 1)
-      console.error(`Updated ${nModified} actions, because of multiple rows with same id`);
-    if (parseInt(nModified, 10) === 0) throw new Error('Nothing modified');
+    await this._changeState(id, actionStates.RETURN_DENIED);
   }
 
   async deleteAction(id) {

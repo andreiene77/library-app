@@ -14,11 +14,10 @@ const StudentDrawer = ({ isOpen, openDrawer, closeDrawer, page, setPage }) => {
         <List>
           {[
             { text: 'Books', icon: <MenuBookIcon /> },
-            { text: 'Search by quote', icon: <SearchIcon /> },
             { text: 'Actions', icon: <BallotIcon /> },
             { text: 'Book a book', icon: <BookmarkIcon /> },
-            { text: 'Borrow a book', icon: <BookIcon /> },
-            { text: 'Return a book', icon: <AssignmentReturnIcon /> },
+            // { text: 'Borrow a book', icon: <BookIcon /> },
+            // { text: 'Return a book', icon: <AssignmentReturnIcon /> },
           ].map((pageItem) => (
             <ListItem
               button

@@ -63,6 +63,12 @@ export const useBooks = ({ initialBooks = [] }) => {
 
   return {
     books: data,
+    booksNames:
+      data &&
+      data.reduce((names, book) => {
+        names[book.id] = book.name;
+        return names;
+      }, {}),
     isLoading: !error && !data,
     isError: error,
     addBook,

@@ -25,13 +25,14 @@ const BooksList = ({ books }) => {
 
   const columns = useMemo(
     () => [
-      { field: 'code', title: 'ID' },
       { field: 'name', title: 'Name' },
       { field: 'author', title: 'Author' },
       { field: 'publHouse', title: 'Publishing House' },
       { field: 'year', title: 'Year', type: 'numeric' },
       { field: 'genre', title: 'Genre' },
       { field: 'copies', title: 'No. Copies', type: 'numeric' },
+      { field: 'place', title: 'Place' },
+      { field: 'code', title: 'Code' },
     ],
     [],
   );
